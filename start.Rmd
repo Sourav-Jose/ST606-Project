@@ -1,0 +1,272 @@
+---
+title: "projectst606"
+author: "Sourav Jose"
+date: "2025-03-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+install.packages("learningtower")  # Install package
+library(learningtower)  # Load package
+
+```
+
+
+```{r}
+library(learningtower)
+data(package = "learningtower")  # Lists all available datasets
+
+
+```
+
+
+```{r}
+library(learningtower)
+
+data("student_subset_2018")  # Load the dataset
+head(student_subset_2018)  # View the first few rows
+
+```
+
+```{r}
+str(student_subset_2018)
+summary(student_subset_2018)
+nrow(student_subset_2018)
+```
+
+```{r}
+library(dplyr)
+
+pisa_ireland <- student_subset_2018 %>% 
+  filter(country == "IRL")  # ISO3 code for Ireland
+
+head(pisa_ireland)  # View first few rows
+
+```
+
+
+
+
+```{r}
+summary(pisa_ireland$math)
+hist(pisa_ireland$math, col = "skyblue", main = "PISA Maths Scores in Ireland")
+
+
+
+```
+
+```{r}
+install.packages("ggplot2")
+install.packages("dplyr")
+
+library(ggplot2)
+library(dplyr)
+
+ggplot(pisa_ireland, aes(x = gender, y = math, fill = gender)) +
+  geom_boxplot() +
+  labs(title = "PISA Maths Scores by Gender in Ireland",
+       x = "Gender",
+       y = "Math Score") +
+  theme_minimal()
+
+```
+
+
+
+
+```{r}
+# Load necessary libraries
+library(learningtower)
+library(dplyr)
+library(ggplot2)
+library(naniar)
+
+# Load the dataset from the learningtower package
+data("student_subset_2018")  
+
+# Assign it to a dataframe
+df <- student_subset_2018
+
+# View the first few rows
+head(df)
+
+# Check the structure of the dataset
+str(df)
+
+# Get summary statistics
+summary(df)
+
+```
+
+```{r}
+# Count missing values per column
+colSums(is.na(df))
+
+# Visualize missing data
+gg_miss_var(df)
+
+
+```
+
+
+```{r}
+df <- df %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.), median(., na.rm = TRUE), .)))
+
+
+```
+
+```{r}
+get_mode <- function(x) {
+  ux <- unique(x[!is.na(x)])
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+df <- df %>%
+  mutate(across(where(is.character), ~ ifelse(is.na(.), get_mode(.), .)))
+
+```
+
+```{r}
+df$gender <- ifelse(df$gender %in% c("M", "male", "m"), "Male",
+                    ifelse(df$gender %in% c("F", "female", "f"), "Female", NA))
+
+df$internet <- ifelse(df$internet %in% c("yes", "YES", "y"), "yes",
+                      ifelse(df$internet %in% c("no", "NO", "n"), "no", NA))
+
+df$computer <- ifelse(df$computer %in% c("yes", "YES", "y"), "yes",
+                      ifelse(df$computer %in% c("no", "NO", "n"), "no", NA))
+
+```
+
+
+```{r}
+df$math <- as.numeric(df$math)
+df$read <- as.numeric(df$read)
+df$science <- as.numeric(df$science)
+
+```
+
+
+```{r}
+# Check for duplicates
+sum(duplicated(df))
+
+# Remove duplicate rows
+df <- df[!duplicated(df), ]
+
+```
+
+```{r}
+library(learningtower)
+
+data("student_subset_2022")  # Load the dataset
+head(student_subset_2022)
+```
+
+```{r}
+str(student_subset_2022)
+summary(student_subset_2022)
+# Find the number of rows in student_subset_2022
+nrow(student_subset_2022)
+
+```
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+library(naniar)
+
+# Load your dataset (replace with your actual dataset name)
+data("student_subset_2022")  # Example data, replace with actual dataset name
+df <- student_subset_2022  # Assign dataset to a variable
+
+# View the first few rows
+head(df)
+# Count missing values per column
+colSums(is.na(df))
+
+# Visualize missing values
+gg_miss_var(df)
+
+```
+
+
+
+```{r}
+# Fill missing numeric columns with the median
+df <- df %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.), median(., na.rm = TRUE), .)))
+
+```
+
+
+```{r}
+# Function to calculate the mode of a vector
+get_mode <- function(x) {
+  ux <- unique(x[!is.na(x)])
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+# Fill missing categorical columns with the mode
+df <- df %>%
+  mutate(across(where(is.character), ~ ifelse(is.na(.), get_mode(.), .)))
+# Check for duplicate rows
+sum(duplicated(df))
+
+# Remove duplicate rows
+df <- df[!duplicated(df), ]
+
+```
+
+```{r}
+# Convert numeric variables if necessary
+df$math <- as.numeric(df$math)
+df$read <- as.numeric(df$read)
+
+# Convert categorical variables to factors
+df$gender <- as.factor(df$gender)
+df$internet <- as.factor(df$internet)
+
+```
+
+```{r}
+# Function to remove outliers based on IQR (Interquartile Range)
+remove_outliers <- function(df, column) {
+  Q1 <- quantile(df[[column]], 0.25)
+  Q3 <- quantile(df[[column]], 0.75)
+  IQR <- Q3 - Q1
+  df <- df[df[[column]] >= (Q1 - 1.5 * IQR) & df[[column]] <= (Q3 + 1.5 * IQR), ]
+  return(df)
+}
+
+# Remove outliers from 'math' column (replace 'math' with other column names if needed)
+df <- remove_outliers(df, "math")
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
