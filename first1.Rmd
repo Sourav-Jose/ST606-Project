@@ -1,0 +1,278 @@
+---
+title: "try1"
+author: "Sourav Jose"
+date: "2025-03-26"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+
+```
+
+## Including Plots
+
+```{r}
+#loading the data and libraries 
+library(learningtower)
+library(tidyverse)
+library(patchwork)
+install.packages("brolgar")
+
+install.packages("gghighlight")
+library(gghighlight)
+install.packages("ggrepel")
+library(ggrepel)
+install.packages("tsibble")
+library(tsibble)
+install.packages("kableExtra")
+library(kableExtra)
+library(broom)
+student <- load_student("all")
+data(countrycode)
+
+theme_set(theme_classic(18) +
+            theme(legend.position = "bottom"))
+```
+
+```{r}
+ireland_data <- student %>% filter(country == "IRL")
+ireland_data
+
+```
+
+
+
+```{r}
+# Checking the structure of the ireland_data
+str(ireland_data)
+
+# Building a linear regression model for math scores based on the available factors
+model <- lm(math ~ gender + room + television + computer + book + wealth + escs, 
+            data = ireland_data)
+
+# Summary of the model
+summary(model)
+
+
+```
+
+
+```{r}
+library(ggplot2)
+
+# Assuming you have math scores and year in your dataset
+ggplot(ireland_data, aes(x = year, y = math)) +
+  geom_line() +
+  ggtitle("PISA Math Scores Trend (2000-2022)") +
+  xlab("Year") +
+  ylab("Average Math Score")
+
+```
+The math scores appear to fluctuate each year, but there isn't a clear upward or downward trend. Instead, the scores show moderate variability.
+
+There are periods where the scores increase slightly and others where they decrease, but the average appears relatively stable over the entire period.
+
+```{r}
+# Scatter plot with regression line
+plot(ireland_data$escs, ireland_data$math,
+     main = "Scatter Plot of ESCS and Math Scores with Regression Line",
+     xlab = "ESCS", ylab = "Math Score",
+     pch = 19, col = rgb(0, 0, 1, 0.5))
+abline(lm(math ~ escs, data = ireland_data), col = "red", lwd = 2)  # Add red regression line
+
+
+
+```
+The plot shows that socioeconomic status (as measured by ESCS) is an important factor influencing math performance. Students from more affluent backgrounds tend to score higher on math assessments
+
+
+```{r}
+ireland_data %>%
+  group_by(year, gender) %>%
+  summarise(mean_math = mean(math, na.rm = TRUE)) %>%
+  ggplot(aes(x = year, y = mean_math, color = gender)) +
+  geom_line() + geom_point() +
+  labs(title = "Math Score Trends by Gender", y = "Mean Math Score", x = "Year")
+
+```
+
+ The graph clearly shows that, in most years, male students consistently outperform female students in PISA math assessments. This difference in average scores is observable at every time point, with male students typically showing higher average scores than their female counterparts.
+
+```{r}
+# Calculate the average math score by number of books
+avg_math_books <- aggregate(math ~ book, data = ireland_data, FUN = mean)
+
+# Bar plot for average math scores by number of books
+barplot(avg_math_books$math, names.arg = avg_math_books$book,
+        col = "lightblue", main = "Average Math Scores by Number of Books",
+        xlab = "Number of Books", ylab = "Average Math Score")
+
+
+
+
+```
+
+
+The plot suggests that having access to books does not drastically change average math scores, but there might be a small advantage for students with a moderate number of books. The slight drop for the "none" category suggests that having no books could be a disadvantage, although the difference is subtle.
+
+
+```{r}
+
+# Bar plot for math scores by television access
+aggregate_math_tv <- aggregate(math ~ television, data = ireland_data, FUN = mean)
+barplot(aggregate_math_tv$math, names.arg = aggregate_math_tv$television,
+        col = "lightyellow", main = "Average Math Scores by Television Access",
+        xlab = "Television Access", ylab = "Average Math Score")
+
+
+
+```
+
+All four bars have a similar height, indicating that there is no significant difference in the average math scores between students who have varying numbers of televisions in their households.
+
+The data seems to show that the number of televisions does not appear to have a strong relationship with the average math score in this dataset.
+
+
+```{r}
+
+
+# Histogram for math scores by computer access
+hist(ireland_data$math[ireland_data$computer_n == 1], col = "blue", xlim = c(0, 800),
+     main = "Distribution of Math Scores with Computer Access", xlab = "Math Scores", 
+     ylab = "Frequency", breaks = 20)
+
+hist(ireland_data$math[ireland_data$computer_n == 0], col = "red", add = TRUE, 
+     breaks = 20)
+legend("topright", legend = c("With Computer", "Without Computer"), fill = c("blue", "red"))
+
+
+```
+The histogram suggests that students with computer access tend to have a more evenly distributed performance across various math score ranges, with some achieving high scores.
+
+On the other hand, students without computer access are more concentrated in the lower to mid-range math scores, indicating that lack of computer access might be associated with lower math performance.
+
+```{r}
+
+# Count of students with and without internet access
+internet_count <- table(ireland_data$internet)
+
+# Pie chart of internet access distribution
+pie(internet_count, labels = names(internet_count), col = c("lightgreen", "lightblue"), 
+    main = "Distribution of Internet Access")
+
+
+
+```
+
+
+```{r}
+
+ireland_data %>%
+  group_by(year, internet) %>%
+  summarise(mean_math = mean(math, na.rm = TRUE)) %>%
+  ggplot(aes(x = year, y = mean_math, color = internet)) +
+  geom_line() + geom_point() +
+  labs(title = "Math Scores by Internet Access Over Years", y = "Mean Math Score", x = "Year")
+
+# Count of students with and without internet access
+internet_count <- table(ireland_data$internet)
+
+# Pie chart of internet access distribution
+pie(internet_count, labels = names(internet_count), col = c("lightgreen", "lightblue"), 
+    main = "Distribution of Internet Access")
+
+```
+The plot shows that internet access does not seem to drastically improve math scores over time. However, students with internet access tend to score slightly higher than those without internet access.
+
+
+```{r}
+
+
+
+
+
+```
+
+```{r}
+
+
+```
+
+```{r}
+# Calculate average math scores by gender
+avg_math_by_gender <- aggregate(math ~ gender, data = ireland_data, FUN = mean)
+
+# Bar plot of average math scores by gender
+barplot(avg_math_by_gender$math, names.arg = avg_math_by_gender$gender, 
+        col = c("pink", "lightblue"), main = "Average Math Scores by Gender", 
+        xlab = "Gender", ylab = "Average Math Score")
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+
+```
+
+```{r}
+install.packages("vioplot")
+library(vioplot)
+
+# Violin plot of math scores by room availability
+vioplot(math ~ room, data = ireland_data, 
+        main = "Math Scores by Room Availability", 
+        xlab = "Room Availability", ylab = "Math Score", col = "lightblue")
+
+```
+The availability of a room for study seems to correlate with slightly higher math scores on average, as the median score for students with a room is higher.
+
+Both groups show similar variations in math scores, but students with room availability tend to have a slightly higher spread of scores as well.
+
+
+```{r}
+
+
+# Boxplot for father's education vs. math scores
+boxplot(math ~ father_educ, data = ireland_data, 
+        main = "Math Scores by Father's Education Level",
+        xlab = "Father's Education Level", ylab = "Math Score",
+        col = "lightcoral", border = "darkred")
+
+```
+The plot suggests that students whose fathers have higher education levels tend to have higher median math scores. The difference in medians between ISCED 1 and ISCED 3A, for example, is noticeable.
+
+The presence of outliers in all groups suggests that while the general trend is that higher paternal education is associated with better math performance, there are exceptions.
+```{r}
+# Boxplot for mother's education vs. math scores
+boxplot(math ~ mother_educ, data = ireland_data, 
+        main = "Math Scores by Mother's Education Level",
+        xlab = "Mother's Education Level", ylab = "Math Score",
+        col = "lightblue", border = "darkblue")
+```
+
+The plot suggests that students whose mothers have higher education levels tend to have higher math scores. The median score for students with mothers who have ISCED 3A or ISCED 3B, C is significantly higher than for those with mothers who have ISCED 1 or ISCED 2.
+
+The presence of outliers in all groups suggests that while the general trend is that higher maternal education is associated with better math performance, there are exceptions.
+
+
+```{r}
+
+
+```
