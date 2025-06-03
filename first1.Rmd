@@ -65,40 +65,24 @@ theme_set(theme_classic(18) +
 ```{r}
 ireland_data <- student %>% filter(country == "IRL")
 ireland_data
+years_in_data <- unique(ireland_data$year)
+print(years_in_data)
 
 ```
 
 
 
 ```{r}
-# Checking the structure of the ireland_data
-str(ireland_data)
 
-# Building a linear regression model for math scores based on the available factors
-model <- lm(math ~ gender + room + television + computer + book + wealth + escs, 
-            data = ireland_data)
-
-# Summary of the model
-summary(model)
 
 
 ```
 
 
 ```{r}
-library(ggplot2)
-
-# Assuming you have math scores and year in your dataset
-ggplot(ireland_data, aes(x = year, y = math)) +
-  geom_line() +
-  ggtitle("PISA Math Scores Trend (2000-2022)") +
-  xlab("Year") +
-  ylab("Average Math Score")
 
 ```
-The math scores appear to fluctuate each year, but there isn't a clear upward or downward trend. Instead, the scores show moderate variability.
 
-There are periods where the scores increase slightly and others where they decrease, but the average appears relatively stable over the entire period.
 
 ```{r}
 # Scatter plot with regression line
@@ -164,15 +148,15 @@ The data seems to show that the number of televisions does not appear to have a 
 ```{r}
 
 
-# Histogram for math scores by computer access
-hist(ireland_data$math[ireland_data$computer_n == 1], col = "blue", xlim = c(0, 800),
-     main = "Distribution of Math Scores with Computer Access", xlab = "Math Scores", 
-     ylab = "Frequency", breaks = 20)
-
-hist(ireland_data$math[ireland_data$computer_n == 0], col = "red", add = TRUE, 
-     breaks = 20)
-legend("topright", legend = c("With Computer", "Without Computer"), fill = c("blue", "red"))
-
+# Boxplot of math scores by computer access
+ggplot(ireland_data, aes(x = factor(computer_n), y = math, fill = factor(computer_n))) +
+  geom_boxplot() +
+  scale_fill_manual(values = c('blue', 'red', 'green', 'yellow'))+
+  theme_minimal() +
+  labs(title = "Math Scores Distribution by Computer Access",
+       x = "Computer Access (0 = No, 1 = Yes)",
+       y = "Math Scores") +
+  scale_x_discrete(labels = c("Without Computer", "With Computer"))
 
 ```
 The histogram suggests that students with computer access tend to have a more evenly distributed performance across various math score ranges, with some achieving high scores.
@@ -180,13 +164,6 @@ The histogram suggests that students with computer access tend to have a more ev
 On the other hand, students without computer access are more concentrated in the lower to mid-range math scores, indicating that lack of computer access might be associated with lower math performance.
 
 ```{r}
-
-# Count of students with and without internet access
-internet_count <- table(ireland_data$internet)
-
-# Pie chart of internet access distribution
-pie(internet_count, labels = names(internet_count), col = c("lightgreen", "lightblue"), 
-    main = "Distribution of Internet Access")
 
 
 
@@ -237,14 +214,7 @@ barplot(avg_math_by_gender$math, names.arg = avg_math_by_gender$gender,
 
 ```
 
-```{r}
 
-```
-
-```{r}
-
-
-```
 
 
 
@@ -278,12 +248,12 @@ The presence of outliers in all groups suggests that while the general trend is 
 
 ```{r}
 
-# Average math score over years
+
 avg_math_year <- ireland_data %>%
   group_by(year) %>%
   summarise(mean_math = mean(math, na.rm = TRUE))
 
-# Plot
+t
 ggplot(avg_math_year, aes(x = year, y = mean_math)) +
   geom_line() +
   geom_point() +
@@ -291,156 +261,19 @@ ggplot(avg_math_year, aes(x = year, y = mean_math)) +
   labs(title = "Trend of Math Scores Over Years in Ireland", y = "Average Math Score")
 
 ```
-```{r}
 
 
-library(dplyr)
-library(ggplot2)
-library(factoextra)
-library(cluster)
 
-# Step 1: Filter and select only the relevant features (math and read)
-ireland_2018 <- ireland_data %>%
-  filter(year == 2018) %>%
-  dplyr::select(math, read) %>%
-  drop_na()  # Remove rows with missing values
-
-# Step 2: Scale the data (important for K-means clustering)
-scaled_cluster_data_2018 <- scale(ireland_2018)
-
-# Step 3: Elbow Method to find the optimal number of clusters
-wss <- sapply(1:10, function(k) {
-  kmeans(scaled_cluster_data_2018, centers = k, nstart = 25)$tot.withinss
-})
-
-# Step 4: Plot the Elbow Method
-elbow_plot <- ggplot(data.frame(k = 1:10, wss = wss), aes(x = k, y = wss)) +
-  geom_line() +
-  geom_point() +
-  theme_minimal() +
-  labs(title = "Elbow Method for Optimal Clusters",
-       x = "Number of Clusters",
-       y = "Within-cluster Sum of Squares (WSS)")
-
-print(elbow_plot)
-
-# Step 5: Silhouette Method to assess clustering quality
-silhouette_scores <- sapply(2:10, function(k) {
-  kmeans_model <- kmeans(scaled_cluster_data_2018, centers = k, nstart = 25)
-  silhouette_score <- silhouette(kmeans_model$cluster, dist(scaled_cluster_data_2018))
-  mean(silhouette_score[, 3])  # Average silhouette width
-})
-
-# Step 6: Plot Silhouette Method
-silhouette_plot <- ggplot(data.frame(k = 2:10, silhouette_score = silhouette_scores), aes(x = k, y = silhouette_score)) +
-  geom_line() +
-  geom_point() +
-  theme_minimal() +
-  labs(title = "Silhouette Method for Optimal Clusters",
-       x = "Number of Clusters",
-       y = "Average Silhouette Score")
-
-print(silhouette_plot)
-
-```
 
 
 ```{r}
-library(dplyr)
-library(ggplot2)
-library(factoextra)
 
-# Step 1: Filter and select only the relevant features (read and math)
-ireland_2018 <- ireland_data %>%
-  filter(year == 2018) %>%
-  dplyr::select(math, read) %>%
-  drop_na()  # Remove rows with missing values
+# Correlation matrix for numeric variables
+cor_matrix <- cor(ireland_data[, sapply(ireland_data, is.numeric)])
 
-# Step 2: Prepare clustering data with only read and math scores
-cluster_data_2018 <- ireland_2018 %>%
-  dplyr::select(math, read)
-
-# Step 3: Scale the data to standardize it
-scaled_cluster_data_2018 <- scale(cluster_data_2018)
-
-# Step 4: Run K-means clustering (let's assume 2 clusters for simplicity)
-set.seed(123)  # Set seed for reproducibility
-kmeans_2018 <- kmeans(scaled_cluster_data_2018, centers = 2, nstart = 25)
-
-# Step 5: Attach cluster labels to the original data
-ireland_2018$cluster <- factor(kmeans_2018$cluster)
-
-# Step 6: Analyze the clusters (mean math and read scores per cluster)
-cluster_summary <- ireland_2018 %>%
-  group_by(cluster) %>%
-  summarise(mean_math = mean(math), mean_read = mean(read), n = n())
-
-print(cluster_summary)
-
-# Step 7: Scatter plot of read vs math scores by cluster
-ggplot(ireland_2018, aes(x = read, y = math, color = cluster)) +
-  geom_point(alpha = 0.7, size = 3) +
-  theme_minimal() +
-  labs(title = "Scatter Plot of Read vs Math Scores  (2018)",
-       x = "Read Score", y = "Math Score") +
-  scale_color_manual(values = c("blue", "red"))
-
-```
-
-```{r}
-
-# Load necessary libraries
-library(dplyr)
-library(ggplot2)
-library(randomForest)
-
-# Step 1: Filter and select only relevant numeric features
-ireland_2018 <- ireland_data %>%
-  filter(year == 2018) %>%
-  dplyr::select(math, wealth, escs, read, science, internet) %>%
-  drop_na()  # Drop rows with missing values
-
-# Step 2: Split the data into training and testing sets (80% training, 20% testing)
-set.seed(123)  # For reproducibility
-train_indices <- sample(1:nrow(ireland_2018), size = 0.8 * nrow(ireland_2018))
-
-train_data <- ireland_2018[train_indices, ]
-test_data <- ireland_2018[-train_indices, ]
-
-# Step 3: Train a Random Forest model
-rf_model <- randomForest(math ~ wealth + escs + read + science + internet,
-                         data = train_data,
-                         ntree = 500,      # Number of trees
-                         mtry = 2,         # Number of variables randomly sampled at each split
-                         importance = TRUE # Calculate feature importance
-)
-
-# Print model details
-print(rf_model)
-
-# Step 4: Make predictions on the test set
-predictions <- predict(rf_model, test_data)
-
-# Step 5: Evaluate the model using Mean Squared Error (MSE)
-mse <- mean((predictions - test_data$math)^2)
-cat("Mean Squared Error (MSE):", mse, "\n")
-
-# Step 6: Calculate R-squared to evaluate how well the model fits the data
-rsq <- 1 - sum((predictions - test_data$math)^2) / sum((mean(test_data$math) - test_data$math)^2)
-cat("R-squared:", rsq, "\n")
-
-# Step 7: Display feature importance
-importance(rf_model)
-varImpPlot(rf_model)
-
-# Step 8: Visualize predictions vs actual values (optional)
-ggplot(data.frame(actual = test_data$math, predicted = predictions), aes(x = actual, y = predicted)) +
-  geom_point() +
-  geom_smooth(method = "lm", color = "red") +
-  theme_minimal() +
-  labs(title = "Actual vs Predicted Math Scores", x = "Actual Math Scores", y = "Predicted Math Scores")
-
-
+# Visualize the correlation matrix
+library(corrplot)
+corrplot(cor_matrix, method = "circle", type = "upper", order = "hclust", tl.col = "black", tl.srt = 45)
 
 
 ```
@@ -452,55 +285,4 @@ ggplot(data.frame(actual = test_data$math, predicted = predictions), aes(x = act
 
 ```{r}
 
-# Load the necessary libraries
-library(dplyr)
-library(randomForest)
-library(ggplot2)
 
-# Step 1: Filter the dataset to include only math and read scores
-ireland_2018 <- ireland_data %>%
-  filter(year == 2018) %>%
-  dplyr::select(math, read) %>%
-  drop_na()  # Remove rows with missing values
-
-# Step 2: Split the data into training and test sets (80% training, 20% test)
-set.seed(123)  # For reproducibility
-train_indices <- sample(1:nrow(ireland_2018), size = 0.8 * nrow(ireland_2018))
-
-train_data <- ireland_2018[train_indices, ]
-test_data <- ireland_2018[-train_indices, ]
-
-# Step 3: Train a Random Forest model
-rf_model <- randomForest(math ~ read,
-                         data = train_data,
-                         ntree = 500,      # Number of trees
-                         mtry = 1,         # Number of variables to sample at each split
-                         importance = TRUE # Calculate feature importance
-)
-
-# Print model summary
-print(rf_model)
-
-# Step 4: Predict on the test set
-predictions <- predict(rf_model, test_data)
-
-# Step 5: Evaluate the model performance using Mean Squared Error (MSE)
-mse <- mean((predictions - test_data$math)^2)
-cat("Mean Squared Error (MSE):", mse, "\n")
-
-# Step 6: Calculate R-squared to assess how well the model fits the data
-rsq <- 1 - sum((predictions - test_data$math)^2) / sum((mean(test_data$math) - test_data$math)^2)
-cat("R-squared:", rsq, "\n")
-
-# Step 7: Display feature importance (in this case, it's only the 'read' feature)
-importance(rf_model)
-
-# Step 8: Visualize the predicted vs actual math scores
-ggplot(data.frame(actual = test_data$math, predicted = predictions), aes(x = actual, y = predicted)) +
-  geom_point() +
-  geom_smooth(method = "lm", color = "red") +
-  theme_minimal() +
-  labs(title = "Actual vs Predicted Math Scores", x = "Actual Math Scores", y = "Predicted Math Scores")
-
-
-```

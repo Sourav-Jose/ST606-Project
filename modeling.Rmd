@@ -1,0 +1,337 @@
+---
+title: "modeling"
+author: "Sourav Jose"
+date: "2025-06-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+
+# Install lme4 if it's not already installed
+library(learningtower)
+student <- load_student("all")
+data(countrycode)
+
+theme_set(theme_classic(18) +
+            theme(legend.position = "bottom"))
+
+ireland_data <- student %>% filter(country == "IRL")
+ireland_data
+# Load the package
+library(lme4)
+
+
+# Load the dataset
+# Assuming the data is already loaded as 'ireland_data'
+# Filter the dataset for the year 2012
+data_2012 <- ireland_data %>% filter(year == 2012)
+
+data_2012 <- na.omit(data_2012)
+# Check for missing values
+summary(data_2012)
+
+
+
+# Convert categorical columns into factors
+data_2012$gender <- as.factor(data_2012$gender)
+data_2012$internet <- as.factor(data_2012$internet)
+data_2012$computer_n <- as.factor(data_2012$computer_n)
+data_2012$room <- as.factor(data_2012$room)
+data_2012$desk <- as.factor(data_2012$desk)
+data_2012$television <- as.factor(data_2012$television)
+data_2012$car <- as.factor(data_2012$car)
+data_2012$book <- as.factor(data_2012$book)
+data_2012$wealth <- as.numeric(data_2012$wealth)
+data_2012$escs <- as.numeric(data_2012$escs)
+data_2012$read <- as.numeric(data_2012$read)
+data_2012$science <- as.numeric(data_2012$science)
+data_2012$mother_educ <- as.factor(data_2012$mother_educ)
+data_2012$father_educ <- as.factor(data_2012$father_educ)
+```
+
+```{r}
+# Refitting the linear mixed-effects model
+model_lmer <- lmer(math ~ internet + gender + wealth + book + father_educ+ mother_educ + read + desk + television + computer_n + car+ (1 | school_id), data = data_2012)
+
+# Summarize the model
+summary(model_lmer)
+
+
+
+```
+
+
+```{r}
+# Plot residuals to check the model fit
+plot(residuals(model_lmer))
+
+# Plot random effects
+ranef(model_lmer)
+
+
+
+
+```
+
+
+```{r}
+# Q-Q plot for checking normality of residuals
+qqnorm(residuals(model_lmer))
+qqline(residuals(model_lmer))
+
+```
+
+
+```{r}
+
+
+# Calculate influence using 'influence()' function
+influence_model <- influence(model_lmer, obs = TRUE)
+
+# Extract Cook's distance from the influence object
+cooks_distance <- influence_model$cooks.distance
+
+# Print Cook's Distance values
+print(cooks_distance)
+
+```
+
+
+
+```{r}
+data_2009 <- ireland_data %>% filter(year == 2009)
+
+data_2009 <- na.omit(data_2009)
+# Check for missing values
+summary(data_2009)
+
+
+
+# Convert categorical columns into factors
+data_2009$gender <- as.factor(data_2009$gender)
+data_2009$internet <- as.factor(data_2009$internet)
+data_2009$computer_n <- as.factor(data_2009$computer_n)
+data_2009$room <- as.factor(data_2009$room)
+data_2009$desk <- as.factor(data_2009$desk)
+data_2009$television <- as.factor(data_2009$television)
+data_2009$car <- as.factor(data_2009$car)
+data_2009$book <- as.factor(data_2009$book)
+data_2009$wealth <- as.numeric(data_2009$wealth)
+data_2009$escs <- as.numeric(data_2009$escs)
+data_2009$read <- as.numeric(data_2009$read)
+data_2009$science <- as.numeric(data_2009$science)
+data_2009$mother_educ <- as.factor(data_2009$mother_educ)
+data_2009$father_educ <- as.factor(data_2009$father_educ)
+```
+
+
+```{r}
+# Refitting the linear mixed-effects model
+model_lmer2 <- lmer(math ~ internet + gender + wealth + book + father_educ+ mother_educ + read + desk + television + computer_n + car+ (1 | school_id), data = data_2009)
+
+# Summarize the model
+summary(model_lmer2)
+```
+
+
+```{r}
+# Plot residuals to check the model fit
+plot(residuals(model_lmer2))
+
+# Plot random effects
+ranef(model_lmer2)
+```
+
+
+
+```{r}
+# Q-Q plot for checking normality of residuals
+qqnorm(residuals(model_lmer2))
+qqline(residuals(model_lmer2))
+
+```
+```{r}
+data_2006 <- ireland_data %>% filter(year == 2006)
+
+data_2006 <- na.omit(data_2006)
+# Check for missing values
+summary(data_2006)
+
+
+
+# Convert categorical columns into factors
+data_2006$gender <- as.factor(data_2006$gender)
+data_2006$internet <- as.factor(data_2006$internet)
+data_2006$computer_n <- as.factor(data_2006$computer_n)
+data_2006$room <- as.factor(data_2006$room)
+data_2006$desk <- as.factor(data_2006$desk)
+data_2006$television <- as.factor(data_2006$television)
+data_2006$car <- as.factor(data_2006$car)
+data_2006$book <- as.factor(data_2006$book)
+data_2006$wealth <- as.numeric(data_2006$wealth)
+data_2006$escs <- as.numeric(data_2006$escs)
+data_2006$read <- as.numeric(data_2006$read)
+data_2006$science <- as.numeric(data_2006$science)
+data_2006$mother_educ <- as.factor(data_2006$mother_educ)
+data_2006$father_educ <- as.factor(data_2006$father_educ)
+```
+
+
+```{r}
+# Refitting the linear mixed-effects model
+model_lmer3 <- lmer(math ~ internet + gender + wealth + book + father_educ+ mother_educ + read + desk + television + computer_n + car+ (1 | school_id), data = data_2009)
+
+# Summarize the model
+summary(model_lmer3)
+```
+
+
+```{r}
+plot(residuals(model_lmer2))
+
+# Plot random effects
+ranef(model_lmer3)
+```
+
+```{r}
+qqnorm(residuals(model_lmer3))
+qqline(residuals(model_lmer3))
+```
+
+```{r}
+# Load necessary library
+library(lme4)
+
+# Assuming ireland_data is already loaded
+# Convert categorical variables to factors
+ireland_data$gender <- as.factor(ireland_data$gender)
+ireland_data$internet <- as.factor(ireland_data$internet)
+ireland_data$computer_n <- as.factor(ireland_data$computer_n)
+ireland_data$room <- as.factor(ireland_data$room)
+ireland_data$desk <- as.factor(ireland_data$desk)
+ireland_data$television <- as.factor(ireland_data$television)
+ireland_data$car <- as.factor(ireland_data$car)
+ireland_data$book <- as.factor(ireland_data$book)
+ireland_data$mother_educ <- as.factor(ireland_data$mother_educ)
+ireland_data$father_educ <- as.factor(ireland_data$father_educ)
+
+# Convert continuous variables to numeric
+ireland_data$wealth <- as.numeric(ireland_data$wealth)
+ireland_data$escs <- as.numeric(ireland_data$escs)
+ireland_data$read <- as.numeric(ireland_data$read)
+ireland_data$science <- as.numeric(ireland_data$science)
+# Check the summary of the data to see how much data is missing
+summary(ireland_data)
+
+```
+
+
+
+```{r}
+# Fit the linear mixed-effects model for the entire dataset (without removing NAs)
+model_lmer_full <- lmer(math ~ internet + gender + wealth + book + father_educ + mother_educ + 
+                        read + desk + television + computer_n + car + (1 | school_id:year), 
+                        data = ireland_data)
+
+# Summarize the model
+summary(model_lmer_full)
+
+```
+
+
+```{r}
+
+summary(model_lmer_full)
+ranef(model_lmer_full)
+plot(residuals(model_lmer_full))
+
+```
+
+```{r}
+
+qqnorm(residuals(model_lmer_full))
+qqline(residuals(model_lmer_full))
+
+```
+
+
+```{r}
+library(randomForest)
+rf_model <- randomForest(math ~ internet + gender + wealth + book + father_educ + mother_educ + 
+                        read + desk + television + computer_n + car, data = ireland_data)
+print(rf_model)
+importance(rf_model)
+
+```
+
+
+```{r}
+
+rf_predictions <- predict(rf_model, newdata = ireland_data)
+
+
+
+```
+
+
+
+
+
+```{r}
+
+lmer_predictions <- predict(model_lmer_full, newdata = ireland_data)
+
+```
+
+
+
+```{r}
+
+rf_rmse <- sqrt(mean((rf_predictions - ireland_data$math)^2))
+
+
+lmer_rmse <- sqrt(mean((lmer_predictions - ireland_data$math)^2))
+
+print(paste("Random Forest RMSE: ", rf_rmse))
+print(paste("Linear Mixed Model RMSE: ", lmer_rmse))
+
+```
+
+
+```{r}
+# Actual vs Predicted for Random Forest
+ggplot(ireland_data, aes(x = math, y = rf_predictions)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  labs(title = "Random Forest: Actual vs Predicted")
+
+```
+
+
+```{r}
+# Actual vs Predicted for Linear Mixed Model
+ggplot(ireland_data, aes(x = math, y = lmer_predictions)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, color = "blue") +
+  labs(title = "Linear Mixed Model: Actual vs Predicted")
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
