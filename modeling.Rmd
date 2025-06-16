@@ -12,11 +12,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-# Load necessary libraries
+
 library(dplyr)
 library(ggplot2)
 
-# Install lme4 if it's not already installed
+
 library(learningtower)
 student <- load_student("all")
 data(countrycode)
@@ -26,22 +26,15 @@ theme_set(theme_classic(18) +
 
 ireland_data <- student %>% filter(country == "IRL")
 ireland_data
-# Load the package
+
 library(lme4)
 
-
-# Load the dataset
-# Assuming the data is already loaded as 'ireland_data'
-# Filter the dataset for the year 2012
 data_2012 <- ireland_data %>% filter(year == 2012)
 
-data_2012 <- na.omit(data_2012)
 # Check for missing values
 summary(data_2012)
 
 
-
-# Convert categorical columns into factors
 data_2012$gender <- as.factor(data_2012$gender)
 data_2012$internet <- as.factor(data_2012$internet)
 data_2012$computer_n <- as.factor(data_2012$computer_n)
@@ -59,10 +52,9 @@ data_2012$father_educ <- as.factor(data_2012$father_educ)
 ```
 
 ```{r}
-# Refitting the linear mixed-effects model
 model_lmer <- lmer(math ~ internet + gender + wealth + book + father_educ+ mother_educ + read + desk + television + computer_n + car+ (1 | school_id), data = data_2012)
 
-# Summarize the model
+
 summary(model_lmer)
 
 
@@ -71,10 +63,10 @@ summary(model_lmer)
 
 
 ```{r}
-# Plot residuals to check the model fit
+
 plot(residuals(model_lmer))
 
-# Plot random effects
+
 ranef(model_lmer)
 
 
@@ -84,7 +76,7 @@ ranef(model_lmer)
 
 
 ```{r}
-# Q-Q plot for checking normality of residuals
+
 qqnorm(residuals(model_lmer))
 qqline(residuals(model_lmer))
 
@@ -94,14 +86,7 @@ qqline(residuals(model_lmer))
 ```{r}
 
 
-# Calculate influence using 'influence()' function
-influence_model <- influence(model_lmer, obs = TRUE)
 
-# Extract Cook's distance from the influence object
-cooks_distance <- influence_model$cooks.distance
-
-# Print Cook's Distance values
-print(cooks_distance)
 
 ```
 
@@ -110,13 +95,10 @@ print(cooks_distance)
 ```{r}
 data_2009 <- ireland_data %>% filter(year == 2009)
 
-data_2009 <- na.omit(data_2009)
-# Check for missing values
+
+
 summary(data_2009)
 
-
-
-# Convert categorical columns into factors
 data_2009$gender <- as.factor(data_2009$gender)
 data_2009$internet <- as.factor(data_2009$internet)
 data_2009$computer_n <- as.factor(data_2009$computer_n)
@@ -135,10 +117,9 @@ data_2009$father_educ <- as.factor(data_2009$father_educ)
 
 
 ```{r}
-# Refitting the linear mixed-effects model
 model_lmer2 <- lmer(math ~ internet + gender + wealth + book + father_educ+ mother_educ + read + desk + television + computer_n + car+ (1 | school_id), data = data_2009)
 
-# Summarize the model
+
 summary(model_lmer2)
 ```
 
@@ -162,7 +143,7 @@ qqline(residuals(model_lmer2))
 ```{r}
 data_2006 <- ireland_data %>% filter(year == 2006)
 
-data_2006 <- na.omit(data_2006)
+
 # Check for missing values
 summary(data_2006)
 
@@ -239,11 +220,17 @@ summary(ireland_data)
 ```{r}
 # Fit the linear mixed-effects model for the entire dataset (without removing NAs)
 model_lmer_full <- lmer(math ~ internet + gender + wealth + book + father_educ + mother_educ + 
-                        read + desk + television + computer_n + car + (1 | school_id:year), 
+                        read + desk + television + computer_n + car + year + (1 | school_id:year), 
                         data = ireland_data)
 
 # Summarize the model
 summary(model_lmer_full)
+install.packages("sjPlot")
+library(sjPlot)
+sjPlot::tab_model(model_lmer_full, 
+                  show.se = TRUE, 
+                  show.ci = TRUE, 
+                  show.obs = FALSE)
 
 ```
 
