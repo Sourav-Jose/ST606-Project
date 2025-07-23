@@ -2,7 +2,9 @@
 title: "try1"
 author: "Sourav Jose"
 date: "2025-03-26"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 
@@ -40,19 +42,19 @@ library(e1071)          # For SVM
       # For XGBoost
 library(plotly)         # For interactive plots
 
-install.packages("xgboost")
+
 library(xgboost)  
-install.packages("caret")
+
 library(caret)   
-install.packages("factoextra")
+
 library(factoextra) 
-install.packages("gghighlight")
+
 library(gghighlight)
-install.packages("ggrepel")
+
 library(ggrepel)
-install.packages("tsibble")
+
 library(tsibble)
-install.packages("kableExtra")
+
 library(kableExtra)
 library(broom)
 student <- load_student("all")
@@ -268,21 +270,79 @@ ggplot(avg_math_year, aes(x = year, y = mean_math)) +
 
 ```{r}
 
-# Correlation matrix for numeric variables
-cor_matrix <- cor(ireland_data[, sapply(ireland_data, is.numeric)])
 
-# Visualize the correlation matrix
-library(corrplot)
-corrplot(cor_matrix, method = "circle", type = "upper", order = "hclust", tl.col = "black", tl.srt = 45)
 
 
 ```
 
 ```{r}
+library(ggplot2)
+
+# Assuming you have a dataframe 'ireland_data' with columns 'read' and 'math'
+ggplot(ireland_data, aes(x = read, y = math)) +
+  geom_point(color = 'blue', alpha = 0.6) + # Scatter plot
+  geom_smooth(method = 'lm', color = 'red', se = FALSE) + # Linear regression line
+  labs(title = 'Relationship Between Reading and Math Scores',
+       x = 'Reading Score',
+       y = 'Math Score') +
+  theme_minimal()
+
+
+
+
 
 
 ```
 
 ```{r}
+# Remove rows with NA in 'book' column
+data_filtered <- ireland_data %>% filter(!is.na(book))
+
+# Create the boxplot for math score vs. book availability
+ggplot(data_filtered, aes(x = book, y = math, fill = book)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Math Scores by Book Availability",
+       x = "Book Availability",
+       y = "Math Score") +
+  scale_fill_brewer(palette = "Set3") +  # Optional: use color palette for distinction
+  theme_minimal()
 
 
+
+```
+
+
+
+```{r}
+
+
+
+interaction.plot(ireland_data$internet, ireland_data$father_educ, ireland_data$math,
+                 xlab = "Internet Access", ylab = "Math Scores", trace.label = "Father's Education")
+
+
+
+```
+
+
+
+```{r}
+
+
+
+
+
+
+
+```
+
+
+
+```{r}
+
+
+
+
+
+
+```

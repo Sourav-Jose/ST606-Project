@@ -26,7 +26,10 @@ theme_set(theme_classic(18) +
 
 ireland_data <- student %>% filter(country == "IRL")
 ireland_data
+```
 
+
+```{r}
 library(lme4)
 
 data_2012 <- ireland_data %>% filter(year == 2012)
@@ -168,10 +171,40 @@ data_2006$father_educ <- as.factor(data_2006$father_educ)
 
 
 ```{r}
+library(MuMIn)
 # Refitting the linear mixed-effects model
 model_lmer3 <- lmer(math ~ internet + gender + wealth + book + father_educ+ mother_educ + read + desk + television + computer_n + car+ (1 | school_id), data = data_2009)
 
-# Summarize the model
+# For LME model
+library(lme4)
+model_lmer3 <- lmer(math ~ internet + gender + wealth + book + father_educ + 
+                    mother_educ + read + desk + television + computer_n + car + (1 | school_id),
+                    data = data_2009)
+
+# Extract the fixed effects summary
+fixed_effects_lmer <- summary(model_lmer3)$coefficients
+fixed_effects_lmer <- as.data.frame(fixed_effects_lmer)
+
+# Extract random effects summary
+random_effects_lmer <- summary(model_lmer3)$varcor
+
+# AIC and R-squared
+marginal_r2 <- MuMIn::r.squaredGLMM(model_lmer3)[1]
+conditional_r2 <- MuMIn::r.squaredGLMM(model_lmer3)[2]
+aic_lmer <- AIC(model_lmer3)
+
+# Combine everything in one table
+summary_lmer <- list(
+  Fixed_Effects = fixed_effects_lmer,
+  Random_Effects = random_effects_lmer,
+  Marginal_R2 = marginal_r2,
+  Conditional_R2 = conditional_r2,
+  AIC = aic_lmer
+)
+
+# Print the summary
+print(summary_lmer)
+
 summary(model_lmer3)
 ```
 
@@ -218,28 +251,68 @@ summary(ireland_data)
 
 
 ```{r}
-# Fit the linear mixed-effects model for the entire dataset (without removing NAs)
-model_lmer_full <- lmer(math ~ internet + gender + wealth + book + father_educ + mother_educ + 
-                        read + desk + television + computer_n + car + year + (1 | school_id:year), 
-                        data = ireland_data)
+library(lme4)       
+library(rsample) 
+
+ireland_data_filtered <- ireland_data %>%
+  filter(year %in% c(2000, 2003, 2006, 2009, 2012, 2015, 2018, 2022)) 
+set.seed(123)  # For reproducibility
+data_split <- initial_split(ireland_data_filtered, prop = 0.7)  
+train_data1 <- training(data_split)
+test_data2 <- testing(data_split)
+
+
+
+model_lmer_full <- lmer(math ~ internet + gender + wealth + book + father_educ + 
+                        mother_educ + read + desk + television + computer_n + car + year + 
+                        (1 | school_id:year), data = train_data1)
+
+# Display model summary
+summary(model_lmer_full)
 
 # Summarize the model
 summary(model_lmer_full)
 install.packages("sjPlot")
-library(sjPlot)
-sjPlot::tab_model(model_lmer_full, 
-                  show.se = TRUE, 
-                  show.ci = TRUE, 
+
+sjPlot::tab_model(model_lmer_full,
+                  show.ci = FALSE, show.aic = TRUE,
+                  show.se = TRUE,
+                  show.stat = FALSE,
                   show.obs = FALSE)
+# # Fit the linear mixed-effects model for the entire dataset (without removing NAs)
+# model_lmer_full <- lmer(math ~ internet + gender + wealth + book + father_educ + mother_educ + 
+#                         read + desk + television + computer_n + car + year + (1 |school_id:year), 
+#                         data = ireland_data)
+# 
+# summary(model_lmer_full)
+# # Format estimates and standard errors as percentages
+# summary_model <- summary(model_lmer_full)
+# 
+# # Access the fixed effects part of the summary
+# fixed_effects <- summary_model$coefficients
+# 
+# # Round the estimates and standard errors to 2 decimal places and format them
+# fixed_effects[, 1:2] <- round(fixed_effects[, 1:2], 2)
+# 
+# # Display formatted output
+# print(fixed_effects)
 
 ```
+```{r}
 
+anova_table <- anova(model_lmer_full)
+print(anova_table)
+
+```
 
 ```{r}
 
 summary(model_lmer_full)
 ranef(model_lmer_full)
 plot(residuals(model_lmer_full))
+
+plot(resid(model_lmer_full), main = "Residual Plot")
+abline(h = 0, col = "red")
 
 ```
 
@@ -248,18 +321,110 @@ plot(residuals(model_lmer_full))
 qqnorm(residuals(model_lmer_full))
 qqline(residuals(model_lmer_full))
 
+plot(fitted(model_lmer_full), resid(model_lmer_full), main = "Fitted vs Residuals")
+abline(h = 0, col = "red")
+
+plot(cooks.distance(model_lmer_full), main = "Cook's Distance")
+
 ```
 
 
 ```{r}
+# Load necessary library
 library(randomForest)
-rf_model <- randomForest(math ~ internet + gender + wealth + book + father_educ + mother_educ + 
-                        read + desk + television + computer_n + car, data = ireland_data)
-print(rf_model)
-importance(rf_model)
+
+# Assuming ireland_data is already loaded
+# Convert categorical variables to factors
+ireland_data$gender <- as.factor(ireland_data$gender)
+ireland_data$internet <- as.factor(ireland_data$internet)
+ireland_data$computer_n <- as.factor(ireland_data$computer_n)
+ireland_data$room <- as.factor(ireland_data$room)
+ireland_data$desk <- as.factor(ireland_data$desk)
+ireland_data$television <- as.factor(ireland_data$television)
+ireland_data$car <- as.factor(ireland_data$car)
+ireland_data$book <- as.factor(ireland_data$book)
+ireland_data$mother_educ <- as.factor(ireland_data$mother_educ)
+ireland_data$father_educ <- as.factor(ireland_data$father_educ)
+
+# Convert continuous variables to numeric
+ireland_data$wealth <- as.numeric(ireland_data$wealth)
+ireland_data$escs <- as.numeric(ireland_data$escs)
+ireland_data$read <- as.numeric(ireland_data$read)
+ireland_data$science <- as.numeric(ireland_data$science)
+# Check the summary of the data to see how much data is missing
+summary(ireland_data)
 
 ```
 
+```{r}
+
+
+library(randomForest)
+library(caret)
+library(rsample)
+
+set.seed(123)  
+
+r <- initial_split(ireland_data, prop = 0.7, strata = "school_id")
+train_data <- na.omit(train_data)
+test_data <- na.omit(test_data)
+
+
+train_data$school_year <- paste(train_data$school_id, train_data$year, sep = "_")
+test_data$school_year <- paste(test_data$school_id, test_data$year, sep = "_")
+
+
+
+rf_model <- randomForest(math ~ internet + gender + wealth + book + father_educ + 
+                         mother_educ + read + desk + television + computer_n + car + escs + 
+                         room + school_year, data = train_data)
+
+
+
+print(rf_model)
+
+
+rf_importance <- importance(rf_model)
+print(rf_importance)
+
+rf_predictions <- predict(rf_model, newdata = test_data)
+rf_rmse <- sqrt(mean((rf_predictions - test_data$math)^2))
+print(paste("Random Forest RMSE: ", rf_rmse))
+
+
+
+
+```
+
+```{r}
+library(randomForest)
+library(ggplot2)
+library(tidyverse)
+
+library(ggplot2)
+
+# Extract feature importance
+importance_df <- as.data.frame(importance(rf_model))
+
+# Print column names to identify the correct variable
+print(colnames(importance_df))
+
+# Replace 'MeanDecreaseGini' with the correct column name from the output of `colnames()`
+ggplot(importance_df, aes(x = reorder(rownames(importance_df), IncNodePurity), y = IncNodePurity)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  coord_flip() + 
+  labs(title = "Feature Importance from Random Forest Model", x = "Feature", y = "IncNodePurity") +
+  theme_minimal()
+
+
+
+print(head(importance_df, 10))
+
+
+
+
+
+```
 
 ```{r}
 
@@ -275,7 +440,15 @@ rf_predictions <- predict(rf_model, newdata = ireland_data)
 
 ```{r}
 
+
+
+
+# Predict using the trained model, excluding random effects
 lmer_predictions <- predict(model_lmer_full, newdata = ireland_data)
+
+# Check the predictions
+print(lmer_predictions)
+
 
 ```
 
@@ -316,9 +489,60 @@ ggplot(ireland_data, aes(x = math, y = lmer_predictions)) +
 
 ```{r}
 
+
+# Predictions for the  Models
+lmer_predictions <- predict(model_lmer_full, newdata = test_data)
+rf_predictions <- predict(rf_model, newdata = test_data)
+
+# Calculate RMSE for  Model
+lmer_rmse <- sqrt(mean((lmer_predictions - test_data$math)^2))
+rf_rmse <- sqrt(mean((rf_predictions - test_data$math)^2))
+
+# Calculate R-squared for  Model
+lmer_r2 <- cor(lmer_predictions, test_data$math)^2
+rf_r2 <- cor(rf_predictions, test_data$math)^2
+
+# Calculate MAPE (Mean Absolute Percentage Error) for  Model
+lmer_mape <- mean(abs((lmer_predictions - test_data$math) / test_data$math)) * 100
+rf_mape <- mean(abs((rf_predictions - test_data$math) / test_data$math)) * 100
+
+# Calculate Mean Error for  Model
+lmer_mean_error <- mean(lmer_predictions - test_data$math)
+rf_mean_error <- mean(rf_predictions - test_data$math)
+
+# Calculate Mean Absolute Error (MAE) for  Model
+lmer_mean_abs_error <- mean(abs(lmer_predictions - test_data$math))
+rf_mean_abs_error <- mean(abs(rf_predictions - test_data$math))
+
+
+comparison_table <- data.frame(
+  Model = c("Linear Mixed Model", "Random Forest"),
+  RMSE = c(lmer_rmse, rf_rmse),
+  R_squared = c(lmer_r2, rf_r2),
+  MAPE_Percent = c(lmer_mape, rf_mape),
+  Mean_Error = c(lmer_mean_error, rf_mean_error),
+  Mean_Abs_Error = c(lmer_mean_abs_error, rf_mean_abs_error)
+)
+
+
+print(comparison_table)
+
 ```
 
 
 ```{r}
+
+install.packages("marginaleffects")
+# After fitting your linear mixed model
+model_lmer_full1 <- lmer(math ~ internet + gender + wealth + book + father_educ + 
+                        mother_educ + read + desk + television + computer_n + car + year + 
+                        (1 | school_id:year), data = train_data)
+
+# Compute marginal effects
+library(marginaleffects)
+lmer_marginal_effects <- marginaleffects(model_lmer_full, variables = c("internet", "gender", "wealth", "book"))
+
+# View marginal effects
+summary(lmer_marginal_effects)
 
 ```
