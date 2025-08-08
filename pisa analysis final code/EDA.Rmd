@@ -1,0 +1,239 @@
+---
+title: "Data visualisation"
+author: "Sourav Jose"
+date: "2025-03-26"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+
+```
+
+## Including Plots
+
+```{r}
+
+
+library(learningtower)
+library(tidyverse)
+library(ggplot2)
+
+library(randomForest)   # For Random Forest
+library(plotly)         # For interactive plots
+
+
+library(caret)   
+
+library(factoextra) 
+
+library(gghighlight)
+
+library(ggrepel)
+
+library(tsibble)
+
+library(kableExtra)
+library(broom)
+student <- load_student("all")
+data(countrycode)
+
+theme_set(theme_classic(18) +
+            theme(legend.position = "bottom"))
+```
+
+```{r}
+ireland_data <- student %>% filter(country == "IRL")
+ireland_data
+years_in_data <- unique(ireland_data$year)
+print(years_in_data)
+ireland_data <- student %>%
+  filter(country == "IRL" & year != 2000)
+
+
+(ireland_data)
+```
+
+
+
+```{r}
+
+levels(ireland_data$father_educ) <- c("less than ISCED1", "ISCED 1","ISCED 2","ISCED 3A","ISCED 3B, C" )
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+ireland_data %>%
+  group_by(year, gender) %>%
+  summarise(mean_math = mean(math, na.rm = TRUE)) %>%
+  ggplot(aes(x = year, y = mean_math, color = gender)) +
+  geom_line() + geom_point() +
+  labs(title = "Math Score Trends by Gender", y = "Mean Math Score", x = "Year")
+
+```
+
+
+```{r}
+
+
+# Boxplot of math scores by computer access
+ggplot(ireland_data, aes(x = factor(computer_n), y = math, fill = factor(computer_n))) +
+  geom_boxplot() +
+  scale_fill_manual(values = c('blue', 'red', 'green', 'yellow'))+
+  theme_minimal() +
+  labs(title = "Math Scores Distribution by Computer Access",
+       x = "Computer Access ",
+       y = "Math Scores") +
+  scale_x_discrete()
+
+```
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+```{r}
+
+ireland_data %>%
+  group_by(year, internet) %>%
+  summarise(mean_math = mean(math, na.rm = TRUE)) %>%
+  ggplot(aes(x = year, y = mean_math, color = internet)) +
+  geom_line() + geom_point() +
+  labs(title = "Math Scores by Internet Access Over Years", y = "Mean Math Score", x = "Year")
+
+
+
+
+
+```
+
+```{r}
+
+
+# Boxplot for father's education vs. math scores
+boxplot(math ~ father_educ, data = ireland_data, 
+        main = "Math Scores by Father's Education Level",
+        xlab = "Father's Education Level", ylab = "Math Score",
+        col = "lightcoral", border = "darkred")
+
+```
+
+```{r}
+
+data_filtered <- ireland_data %>% filter(!is.na(book))
+
+data_filtered$book <- factor(data_filtered$book, levels = c(
+  "0-10", "11-25", "26-100", "101-200", "201-500", "more than 500"
+))
+ggplot(data_filtered, aes(x = book, y = math, fill = book)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Math Scores by Book Availability",
+       x = "Book Availability",
+       y = "Math Score") +
+  scale_fill_brewer(palette = "Set3") +  
+  theme_minimal()
+
+
+
+```
+
+
+
+```{r}
+library(ggplot2)
+
+ggplot(ireland_data, aes(x = escs, y = math)) +
+  geom_hex(bins = 50) +
+  scale_fill_viridis_c(option = "plasma") +  # colorful scale for counts
+  geom_smooth(method = "lm", color = "red") +
+  labs(title = "Hexbin Plot of Math Scores vs. ESCS",
+       x = "ESCS", y = "Math Score", fill = "Count") +
+  theme_minimal()
+
+
+
+
+
+```
+
+
+
+
+
+```{r}
+
+# Boxplot of Math Scores by Room Availability
+ggplot(ireland_data, aes(x = room, y = math, fill = room)) +
+  geom_boxplot() +
+  labs(title = "Math Scores by Room Availability", x = "Room Availability", y = "Math Score") +
+  scale_fill_manual(values = c("lightblue", "lightgreen")) +
+  theme_minimal()
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
