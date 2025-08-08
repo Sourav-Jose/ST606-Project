@@ -141,7 +141,6 @@ chunks within the document. You can embed an R code chunk like this:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\#loading the data and libraries }
 \FunctionTok{library}\NormalTok{(learningtower)}
 \end{Highlighting}
 \end{Shaded}
@@ -152,8 +151,6 @@ chunks within the document. You can embed an R code chunk like this:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(patchwork)}
-\CommentTok{\# Load libraries}
 \FunctionTok{library}\NormalTok{(tidyverse)}
 \end{Highlighting}
 \end{Shaded}
@@ -177,9 +174,7 @@ chunks within the document. You can embed an R code chunk like this:
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(ggplot2)}
-\FunctionTok{library}\NormalTok{(cluster)       }\CommentTok{\# For clustering}
-    \CommentTok{\# For visualizing clusters}
-       \CommentTok{\# For machine learning}
+
 \FunctionTok{library}\NormalTok{(randomForest)   }\CommentTok{\# For Random Forest}
 \end{Highlighting}
 \end{Shaded}
@@ -201,8 +196,6 @@ chunks within the document. You can embed an R code chunk like this:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(e1071)          }\CommentTok{\# For SVM}
-      \CommentTok{\# For XGBoost}
 \FunctionTok{library}\NormalTok{(plotly)         }\CommentTok{\# For interactive plots}
 \end{Highlighting}
 \end{Shaded}
@@ -222,25 +215,6 @@ chunks within the document. You can embed an R code chunk like this:
 ## The following object is masked from 'package:graphics':
 ## 
 ##     layout
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(xgboost)  }
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## 
-## Attaching package: 'xgboost'
-## 
-## The following object is masked from 'package:plotly':
-## 
-##     slice
-## 
-## The following object is masked from 'package:dplyr':
-## 
-##     slice
 \end{verbatim}
 
 \begin{Shaded}
@@ -384,19 +358,39 @@ chunks within the document. You can embed an R code chunk like this:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Scatter plot with regression line}
-\FunctionTok{plot}\NormalTok{(ireland\_data}\SpecialCharTok{$}\NormalTok{escs, ireland\_data}\SpecialCharTok{$}\NormalTok{math,}
-     \AttributeTok{main =} \StringTok{"Scatter Plot of ESCS and Math Scores with Regression Line"}\NormalTok{,}
-     \AttributeTok{xlab =} \StringTok{"ESCS"}\NormalTok{, }\AttributeTok{ylab =} \StringTok{"Math Score"}\NormalTok{,}
-     \AttributeTok{pch =} \DecValTok{19}\NormalTok{, }\AttributeTok{col =} \FunctionTok{rgb}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, }\FloatTok{0.5}\NormalTok{))}
-\FunctionTok{abline}\NormalTok{(}\FunctionTok{lm}\NormalTok{(math }\SpecialCharTok{\textasciitilde{}}\NormalTok{ escs, }\AttributeTok{data =}\NormalTok{ ireland\_data), }\AttributeTok{col =} \StringTok{"red"}\NormalTok{, }\AttributeTok{lwd =} \DecValTok{2}\NormalTok{)  }\CommentTok{\# Add red regression line}
+\NormalTok{ireland\_data }\OtherTok{\textless{}{-}}\NormalTok{ student }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(country }\SpecialCharTok{==} \StringTok{"IRL"} \SpecialCharTok{\&}\NormalTok{ year }\SpecialCharTok{!=} \DecValTok{2000}\NormalTok{)}
+
+
+\NormalTok{(ireland\_data)}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{first1_files/figure-latex/unnamed-chunk-6-1.pdf} The
-plot shows that socioeconomic status (as measured by ESCS) is an
-important factor influencing math performance. Students from more
-affluent backgrounds tend to score higher on math assessments
+\begin{verbatim}
+## # A tibble: 34,305 x 22
+##     year country school_id student_id mother_educ    father_educ gender computer
+##    <int> <fct>   <chr>          <int> <fct>          <fct>       <fct>  <fct>   
+##  1  2003 IRL     00001              1 ISCED 3A       ISCED 3A    female yes     
+##  2  2003 IRL     00001              2 ISCED 3A       ISCED 3A    male   yes     
+##  3  2003 IRL     00001              3 ISCED 2        ISCED 2     male   no      
+##  4  2003 IRL     00001              4 ISCED 3A       ISCED 1     female yes     
+##  5  2003 IRL     00001              5 ISCED 3A       ISCED 3A    male   yes     
+##  6  2003 IRL     00001              6 less than ISC~ less than ~ male   yes     
+##  7  2003 IRL     00001              7 ISCED 3A       ISCED 2     male   yes     
+##  8  2003 IRL     00001              8 ISCED 3A       ISCED 3A    female yes     
+##  9  2003 IRL     00001              9 ISCED 3A       ISCED 3A    male   yes     
+## 10  2003 IRL     00001             10 ISCED 1        ISCED 3A    female yes     
+## # i 34,295 more rows
+## # i 14 more variables: internet <fct>, math <dbl>, read <dbl>, science <dbl>,
+## #   stu_wgt <dbl>, desk <fct>, room <fct>, dishwasher <fct>, television <fct>,
+## #   computer_n <fct>, car <fct>, book <fct>, wealth <dbl>, escs <dbl>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{levels}\NormalTok{(ireland\_data}\SpecialCharTok{$}\NormalTok{father\_educ) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"less than ISCED1"}\NormalTok{, }\StringTok{"ISCED 1"}\NormalTok{,}\StringTok{"ISCED 2"}\NormalTok{,}\StringTok{"ISCED 3A"}\NormalTok{,}\StringTok{"ISCED 3B, C"}\NormalTok{ )}
+\end{Highlighting}
+\end{Shaded}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -414,51 +408,7 @@ affluent backgrounds tend to score higher on math assessments
 ## `.groups` argument.
 \end{verbatim}
 
-\includegraphics{first1_files/figure-latex/unnamed-chunk-7-1.pdf}
-
-The graph clearly shows that, in most years, male students consistently
-outperform female students in PISA math assessments. This difference in
-average scores is observable at every time point, with male students
-typically showing higher average scores than their female counterparts.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Calculate the average math score by number of books}
-\NormalTok{avg\_math\_books }\OtherTok{\textless{}{-}} \FunctionTok{aggregate}\NormalTok{(math }\SpecialCharTok{\textasciitilde{}}\NormalTok{ book, }\AttributeTok{data =}\NormalTok{ ireland\_data, }\AttributeTok{FUN =}\NormalTok{ mean)}
-
-\CommentTok{\# Bar plot for average math scores by number of books}
-\FunctionTok{barplot}\NormalTok{(avg\_math\_books}\SpecialCharTok{$}\NormalTok{math, }\AttributeTok{names.arg =}\NormalTok{ avg\_math\_books}\SpecialCharTok{$}\NormalTok{book,}
-        \AttributeTok{col =} \StringTok{"lightblue"}\NormalTok{, }\AttributeTok{main =} \StringTok{"Average Math Scores by Number of Books"}\NormalTok{,}
-        \AttributeTok{xlab =} \StringTok{"Number of Books"}\NormalTok{, }\AttributeTok{ylab =} \StringTok{"Average Math Score"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{first1_files/figure-latex/unnamed-chunk-8-1.pdf}
-
-The plot suggests that having access to books does not drastically
-change average math scores, but there might be a small advantage for
-students with a moderate number of books. The slight drop for the
-``none'' category suggests that having no books could be a disadvantage,
-although the difference is subtle.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Bar plot for math scores by television access}
-\NormalTok{aggregate\_math\_tv }\OtherTok{\textless{}{-}} \FunctionTok{aggregate}\NormalTok{(math }\SpecialCharTok{\textasciitilde{}}\NormalTok{ television, }\AttributeTok{data =}\NormalTok{ ireland\_data, }\AttributeTok{FUN =}\NormalTok{ mean)}
-\FunctionTok{barplot}\NormalTok{(aggregate\_math\_tv}\SpecialCharTok{$}\NormalTok{math, }\AttributeTok{names.arg =}\NormalTok{ aggregate\_math\_tv}\SpecialCharTok{$}\NormalTok{television,}
-        \AttributeTok{col =} \StringTok{"lightyellow"}\NormalTok{, }\AttributeTok{main =} \StringTok{"Average Math Scores by Television Access"}\NormalTok{,}
-        \AttributeTok{xlab =} \StringTok{"Television Access"}\NormalTok{, }\AttributeTok{ylab =} \StringTok{"Average Math Score"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{first1_files/figure-latex/unnamed-chunk-9-1.pdf}
-
-All four bars have a similar height, indicating that there is no
-significant difference in the average math scores between students who
-have varying numbers of televisions in their households.
-
-The data seems to show that the number of televisions does not appear to
-have a strong relationship with the average math score in this dataset.
+\includegraphics{first1_files/figure-latex/unnamed-chunk-6-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -468,25 +418,13 @@ have a strong relationship with the average math score in this dataset.
   \FunctionTok{scale\_fill\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}blue\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}red\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}green\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}yellow\textquotesingle{}}\NormalTok{))}\SpecialCharTok{+}
   \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
   \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Math Scores Distribution by Computer Access"}\NormalTok{,}
-       \AttributeTok{x =} \StringTok{"Computer Access (0 = No, 1 = Yes)"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Computer Access "}\NormalTok{,}
        \AttributeTok{y =} \StringTok{"Math Scores"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_x\_discrete}\NormalTok{(}\AttributeTok{labels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Without Computer"}\NormalTok{, }\StringTok{"With Computer"}\NormalTok{))}
+  \FunctionTok{scale\_x\_discrete}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{verbatim}
-## Warning: Removed 1285 rows containing non-finite outside the scale range
-## (`stat_boxplot()`).
-\end{verbatim}
-
-\includegraphics{first1_files/figure-latex/unnamed-chunk-10-1.pdf} The
-histogram suggests that students with computer access tend to have a
-more evenly distributed performance across various math score ranges,
-with some achieving high scores.
-
-On the other hand, students without computer access are more
-concentrated in the lower to mid-range math scores, indicating that lack
-of computer access might be associated with lower math performance.
+\includegraphics{first1_files/figure-latex/unnamed-chunk-7-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -504,37 +442,7 @@ of computer access might be associated with lower math performance.
 ## `.groups` argument.
 \end{verbatim}
 
-\includegraphics{first1_files/figure-latex/unnamed-chunk-12-1.pdf}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Count of students with and without internet access}
-\NormalTok{internet\_count }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(ireland\_data}\SpecialCharTok{$}\NormalTok{internet)}
-
-\CommentTok{\# Pie chart of internet access distribution}
-\FunctionTok{pie}\NormalTok{(internet\_count, }\AttributeTok{labels =} \FunctionTok{names}\NormalTok{(internet\_count), }\AttributeTok{col =} \FunctionTok{c}\NormalTok{(}\StringTok{"lightgreen"}\NormalTok{, }\StringTok{"lightblue"}\NormalTok{), }
-    \AttributeTok{main =} \StringTok{"Distribution of Internet Access"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{first1_files/figure-latex/unnamed-chunk-12-2.pdf} The
-plot shows that internet access does not seem to drastically improve
-math scores over time. However, students with internet access tend to
-score slightly higher than those without internet access.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Calculate average math scores by gender}
-\NormalTok{avg\_math\_by\_gender }\OtherTok{\textless{}{-}} \FunctionTok{aggregate}\NormalTok{(math }\SpecialCharTok{\textasciitilde{}}\NormalTok{ gender, }\AttributeTok{data =}\NormalTok{ ireland\_data, }\AttributeTok{FUN =}\NormalTok{ mean)}
-
-\CommentTok{\# Bar plot of average math scores by gender}
-\FunctionTok{barplot}\NormalTok{(avg\_math\_by\_gender}\SpecialCharTok{$}\NormalTok{math, }\AttributeTok{names.arg =}\NormalTok{ avg\_math\_by\_gender}\SpecialCharTok{$}\NormalTok{gender, }
-        \AttributeTok{col =} \FunctionTok{c}\NormalTok{(}\StringTok{"pink"}\NormalTok{, }\StringTok{"lightblue"}\NormalTok{), }\AttributeTok{main =} \StringTok{"Average Math Scores by Gender"}\NormalTok{, }
-        \AttributeTok{xlab =} \StringTok{"Gender"}\NormalTok{, }\AttributeTok{ylab =} \StringTok{"Average Math Score"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{first1_files/figure-latex/unnamed-chunk-15-1.pdf}
+\includegraphics{first1_files/figure-latex/unnamed-chunk-8-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -546,126 +454,68 @@ score slightly higher than those without internet access.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{first1_files/figure-latex/unnamed-chunk-16-1.pdf} The
-plot suggests that students whose fathers have higher education levels
-tend to have higher median math scores. The difference in medians
-between ISCED 1 and ISCED 3A, for example, is noticeable.
-
-The presence of outliers in all groups suggests that while the general
-trend is that higher paternal education is associated with better math
-performance, there are exceptions.
+\includegraphics{first1_files/figure-latex/unnamed-chunk-9-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Boxplot for mother\textquotesingle{}s education vs. math scores}
-\FunctionTok{boxplot}\NormalTok{(math }\SpecialCharTok{\textasciitilde{}}\NormalTok{ mother\_educ, }\AttributeTok{data =}\NormalTok{ ireland\_data, }
-        \AttributeTok{main =} \StringTok{"Math Scores by Mother\textquotesingle{}s Education Level"}\NormalTok{,}
-        \AttributeTok{xlab =} \StringTok{"Mother\textquotesingle{}s Education Level"}\NormalTok{, }\AttributeTok{ylab =} \StringTok{"Math Score"}\NormalTok{,}
-        \AttributeTok{col =} \StringTok{"lightblue"}\NormalTok{, }\AttributeTok{border =} \StringTok{"darkblue"}\NormalTok{)}
+\NormalTok{data\_filtered }\OtherTok{\textless{}{-}}\NormalTok{ ireland\_data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(book))}
+
+\NormalTok{data\_filtered}\SpecialCharTok{$}\NormalTok{book }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(data\_filtered}\SpecialCharTok{$}\NormalTok{book, }\AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}
+  \StringTok{"0{-}10"}\NormalTok{, }\StringTok{"11{-}25"}\NormalTok{, }\StringTok{"26{-}100"}\NormalTok{, }\StringTok{"101{-}200"}\NormalTok{, }\StringTok{"201{-}500"}\NormalTok{, }\StringTok{"more than 500"}
+\NormalTok{))}
+\FunctionTok{ggplot}\NormalTok{(data\_filtered, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ book, }\AttributeTok{y =}\NormalTok{ math, }\AttributeTok{fill =}\NormalTok{ book)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Distribution of Math Scores by Book Availability"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Book Availability"}\NormalTok{,}
+       \AttributeTok{y =} \StringTok{"Math Score"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_brewer}\NormalTok{(}\AttributeTok{palette =} \StringTok{"Set3"}\NormalTok{) }\SpecialCharTok{+}  
+  \FunctionTok{theme\_minimal}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{first1_files/figure-latex/unnamed-chunk-17-1.pdf}
-
-The plot suggests that students whose mothers have higher education
-levels tend to have higher math scores. The median score for students
-with mothers who have ISCED 3A or ISCED 3B, C is significantly higher
-than for those with mothers who have ISCED 1 or ISCED 2.
-
-The presence of outliers in all groups suggests that while the general
-trend is that higher maternal education is associated with better math
-performance, there are exceptions.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{avg\_math\_year }\OtherTok{\textless{}{-}}\NormalTok{ ireland\_data }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{group\_by}\NormalTok{(year) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{mean\_math =} \FunctionTok{mean}\NormalTok{(math, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{))}
-
-\NormalTok{t}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## function (x) 
-## UseMethod("t")
-## <bytecode: 0x0000027e650be1e8>
-## <environment: namespace:base>
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{ggplot}\NormalTok{(avg\_math\_year, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ year, }\AttributeTok{y =}\NormalTok{ mean\_math)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_line}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Trend of Math Scores Over Years in Ireland"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Average Math Score"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{first1_files/figure-latex/unnamed-chunk-18-1.pdf}
+\includegraphics{first1_files/figure-latex/unnamed-chunk-10-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(ggplot2)}
 
-\CommentTok{\# Assuming you have a dataframe \textquotesingle{}ireland\_data\textquotesingle{} with columns \textquotesingle{}read\textquotesingle{} and \textquotesingle{}math\textquotesingle{}}
-\FunctionTok{ggplot}\NormalTok{(ireland\_data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ read, }\AttributeTok{y =}\NormalTok{ math)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{color =} \StringTok{\textquotesingle{}blue\textquotesingle{}}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.6}\NormalTok{) }\SpecialCharTok{+} \CommentTok{\# Scatter plot}
-  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{\textquotesingle{}lm\textquotesingle{}}\NormalTok{, }\AttributeTok{color =} \StringTok{\textquotesingle{}red\textquotesingle{}}\NormalTok{, }\AttributeTok{se =} \ConstantTok{FALSE}\NormalTok{) }\SpecialCharTok{+} \CommentTok{\# Linear regression line}
-  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{\textquotesingle{}Relationship Between Reading and Math Scores\textquotesingle{}}\NormalTok{,}
-       \AttributeTok{x =} \StringTok{\textquotesingle{}Reading Score\textquotesingle{}}\NormalTok{,}
-       \AttributeTok{y =} \StringTok{\textquotesingle{}Math Score\textquotesingle{}}\NormalTok{) }\SpecialCharTok{+}
+\FunctionTok{ggplot}\NormalTok{(ireland\_data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ escs, }\AttributeTok{y =}\NormalTok{ math)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_hex}\NormalTok{(}\AttributeTok{bins =} \DecValTok{50}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_viridis\_c}\NormalTok{(}\AttributeTok{option =} \StringTok{"plasma"}\NormalTok{) }\SpecialCharTok{+}  \CommentTok{\# colorful scale for counts}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{color =} \StringTok{"red"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Hexbin Plot of Math Scores vs. ESCS"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"ESCS"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Math Score"}\NormalTok{, }\AttributeTok{fill =} \StringTok{"Count"}\NormalTok{) }\SpecialCharTok{+}
   \FunctionTok{theme\_minimal}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
+
+\begin{verbatim}
+## Warning: Removed 454 rows containing non-finite outside the scale range
+## (`stat_binhex()`).
+\end{verbatim}
 
 \begin{verbatim}
 ## `geom_smooth()` using formula = 'y ~ x'
 \end{verbatim}
 
 \begin{verbatim}
-## Warning: Removed 1285 rows containing non-finite outside the scale range
+## Warning: Removed 454 rows containing non-finite outside the scale range
 ## (`stat_smooth()`).
 \end{verbatim}
 
-\begin{verbatim}
-## Warning: Removed 1285 rows containing missing values or values outside the scale range
-## (`geom_point()`).
-\end{verbatim}
-
-\includegraphics{first1_files/figure-latex/unnamed-chunk-20-1.pdf}
+\includegraphics{first1_files/figure-latex/unnamed-chunk-11-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Remove rows with NA in \textquotesingle{}book\textquotesingle{} column}
-\NormalTok{data\_filtered }\OtherTok{\textless{}{-}}\NormalTok{ ireland\_data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(book))}
-
-\CommentTok{\# Create the boxplot for math score vs. book availability}
-\FunctionTok{ggplot}\NormalTok{(data\_filtered, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ book, }\AttributeTok{y =}\NormalTok{ math, }\AttributeTok{fill =}\NormalTok{ book)) }\SpecialCharTok{+}
+\CommentTok{\# Boxplot of Math Scores by Room Availability}
+\FunctionTok{ggplot}\NormalTok{(ireland\_data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ room, }\AttributeTok{y =}\NormalTok{ math, }\AttributeTok{fill =}\NormalTok{ room)) }\SpecialCharTok{+}
   \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
-  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Distribution of Math Scores by Book Availability"}\NormalTok{,}
-       \AttributeTok{x =} \StringTok{"Book Availability"}\NormalTok{,}
-       \AttributeTok{y =} \StringTok{"Math Score"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_fill\_brewer}\NormalTok{(}\AttributeTok{palette =} \StringTok{"Set3"}\NormalTok{) }\SpecialCharTok{+}  \CommentTok{\# Optional: use color palette for distinction}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Math Scores by Room Availability"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Room Availability"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Math Score"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"lightblue"}\NormalTok{, }\StringTok{"lightgreen"}\NormalTok{)) }\SpecialCharTok{+}
   \FunctionTok{theme\_minimal}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{verbatim}
-## Warning: Removed 1269 rows containing non-finite outside the scale range
-## (`stat_boxplot()`).
-\end{verbatim}
-
-\includegraphics{first1_files/figure-latex/unnamed-chunk-21-1.pdf}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{interaction.plot}\NormalTok{(ireland\_data}\SpecialCharTok{$}\NormalTok{internet, ireland\_data}\SpecialCharTok{$}\NormalTok{father\_educ, ireland\_data}\SpecialCharTok{$}\NormalTok{math,}
-                 \AttributeTok{xlab =} \StringTok{"Internet Access"}\NormalTok{, }\AttributeTok{ylab =} \StringTok{"Math Scores"}\NormalTok{, }\AttributeTok{trace.label =} \StringTok{"Father\textquotesingle{}s Education"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{first1_files/figure-latex/unnamed-chunk-22-1.pdf}
+\includegraphics{first1_files/figure-latex/unnamed-chunk-12-1.pdf}
 
 \end{document}

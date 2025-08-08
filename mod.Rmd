@@ -1,0 +1,243 @@
+---
+title: "mod"
+author: "Sourav Jose"
+date: "2025-07-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+
+library(learningtower)
+student <- load_student("all")
+data(countrycode)
+
+theme_set(theme_classic(18) +
+            theme(legend.position = "bottom"))
+
+ireland_data <- student %>%
+  filter(country == "IRL" & year != 2000)
+
+
+(ireland_data)
+```
+
+
+```{r}
+library(lme4)
+
+# Assuming ireland_data is already loaded
+# Convert categorical variables to factors
+ireland_data$gender <- as.factor(ireland_data$gender)
+ireland_data$internet <- as.factor(ireland_data$internet)
+ireland_data$computer_n <- as.factor(ireland_data$computer_n)
+ireland_data$room <- as.factor(ireland_data$room)
+ireland_data$desk <- as.factor(ireland_data$desk)
+ireland_data$television <- as.factor(ireland_data$television)
+ireland_data$car <- as.factor(ireland_data$car)
+ireland_data$book <- as.factor(ireland_data$book)
+ireland_data$mother_educ <- as.factor(ireland_data$mother_educ)
+ireland_data$father_educ <- as.factor(ireland_data$father_educ)
+
+# Convert continuous variables to numeric
+ireland_data$wealth <- as.numeric(ireland_data$wealth)
+ireland_data$escs <- as.numeric(ireland_data$escs)
+ireland_data$read <- as.numeric(ireland_data$read)
+ireland_data$science <- as.numeric(ireland_data$science)
+
+train_data$school_year <- as.factor(train_data$school_year)
+levels(ireland_data$father_educ) <- c("less than ISCED1", "ISCED 1","ISCED 2","ISCED 3A","ISCED 3B, C" )
+
+levels(ireland_data$mother_educ) <- c("less than ISCED1", "ISCED 1","ISCED 2","ISCED 3A","ISCED 3B, C" )
+
+# Check the summary of the data to see how much data is missing
+summary(ireland_data)
+```
+
+
+```{r}
+library(lme4)  # For Linear Mixed Models
+library(randomForest)  # For Random Forest
+library(caret)  # For model evaluation and splitting
+library(rsample) 
+
+
+set.seed(123)
+
+ireland_data <- na.omit(ireland_data)
+ireland_data$school_year <- paste(ireland_data$school_id, ireland_data$year, sep = "-")
+r <- initial_split(ireland_data, prop = 0.7, strata = "school_year")
+
+train_data <- training(r)
+test_data <- testing(r)
+
+
+```
+
+
+
+```{r}
+# Fit the Linear Mixed Model
+model_lmer_full <- lmer(math ~ internet + gender + wealth + book + father_educ + 
+                        mother_educ + read + desk + television + computer_n + car + year +escs+ 
+                        (1 | school_id:year), data = train_data)
+
+# Display the model summary
+summary(model_lmer_full)
+
+sjPlot::tab_model(model_lmer_full,
+                  show.ci = FALSE, show.aic = TRUE,
+                  show.se = TRUE,
+                  show.stat = FALSE,
+                  show.obs = FALSE)
+
+# Predictions using the LMM on the test set
+lmer_predictions <- predict(model_lmer_full, newdata = test_data)
+
+# Calculate evaluation metrics for LMM
+lmer_rmse <- sqrt(mean((lmer_predictions - test_data$math)^2))
+lmer_r2 <- cor(lmer_predictions, test_data$math)^2
+lmer_mape <- mean(abs((lmer_predictions - test_data$math) / test_data$math)) * 100
+lmer_mean_error <- mean(lmer_predictions - test_data$math)
+lmer_mean_abs_error <- mean(abs(lmer_predictions - test_data$math))
+
+# Print evaluation metrics for LMM
+print(data.frame(RMSE = lmer_rmse, R_squared = lmer_r2, MAPE_Percent = lmer_mape, 
+                 Mean_Error = lmer_mean_error, Mean_Abs_Error = lmer_mean_abs_error))
+
+```
+```{r}
+summary(model_lmer_full)
+ranef(model_lmer_full)
+plot(residuals(model_lmer_full))
+
+plot(resid(model_lmer_full), main = "Residual Plot")
+abline(h = 0, col = "red")
+```
+
+```{r}
+qqnorm(residuals(model_lmer_full))
+qqline(residuals(model_lmer_full))
+
+plot(fitted(model_lmer_full), resid(model_lmer_full), main = "Fitted vs Residuals")
+abline(h = 0, col = "red")
+
+plot(cooks.distance(model_lmer_full), main = "Cook's Distance")
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+rf_model <- randomForest(math ~ internet + gender + wealth + book + father_educ + 
+                         mother_educ + read + desk + television + computer_n + car + escs + 
+                         room + school_year, data = train_data)
+
+# Print Random Forest model summary
+print(rf_model)
+
+rf_importance <- importance(rf_model)
+print(rf_importance)
+# Predictions using the Random Forest model on the test set
+rf_predictions <- predict(rf_model, newdata = test_data)
+
+# Calculate evaluation metrics for Random Forest
+rf_rmse <- sqrt(mean((rf_predictions - test_data$math)^2))
+rf_r2 <- cor(rf_predictions, test_data$math)^2
+rf_mape <- mean(abs((rf_predictions - test_data$math) / test_data$math)) * 100
+rf_mean_error <- mean(rf_predictions - test_data$math)
+rf_mean_abs_error <- mean(abs(rf_predictions - test_data$math))
+
+# Print evaluation metrics for Random Forest
+print(data.frame(RMSE = rf_rmse, R_squared = rf_r2, MAPE_Percent = rf_mape, 
+                 Mean_Error = rf_mean_error, Mean_Abs_Error = rf_mean_abs_error))
+
+```
+
+
+
+```{r}
+# Combine results into a comparison table
+comparison_table <- data.frame(
+  Model = c("Linear Mixed Model", "Random Forest"),
+  RMSE = c(lmer_rmse, rf_rmse),
+  R_squared = c(lmer_r2, rf_r2),
+  MAPE_Percent = c(lmer_mape, rf_mape),
+  Mean_Error = c(lmer_mean_error, rf_mean_error),
+  Mean_Abs_Error = c(lmer_mean_abs_error, rf_mean_abs_error)
+)
+
+# Print the comparison table
+print(comparison_table)
+
+```
+
+```{r}
+# Extract feature importance
+importance_df <- as.data.frame(importance(rf_model))
+
+# Print column names to identify the correct variable
+print(colnames(importance_df))
+
+# Replace 'MeanDecreaseGini' with the correct column name from the output of `colnames()`
+ggplot(importance_df, aes(x = reorder(rownames(importance_df), IncNodePurity), y = IncNodePurity)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  coord_flip() + 
+  labs(title = "Feature Importance from Random Forest Model", x = "Feature", y = "IncNodePurity") +
+  theme_minimal()
+
+
+
+print(head(importance_df, 10))
+```
+
+
+
+
+```{r}
+
+library(pdp)
+library(effects)
+library(gridExtra)
+library(ggplot2)
+
+compare_lmm_rf <- function(var, rf_model, lmm_model, train_data) {
+  # Partial Dependence Plot from Random Forest
+  pd <- partial(rf_model, pred.var = var, train = train_data)
+  p_rf <- autoplot(pd, rug = TRUE, train = train_data) +
+    labs(title = paste("Random Forest PDP -", var),
+         x = var, y = "Predicted Math Score") +
+    theme_minimal(base_size = 12) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+  # Effect Plot from Linear Mixed Model
+  ef <- Effect(var, lmm_model)
+  p_lmm <- plot(ef, main = paste("LMM Effect -", var), ylab = "Predicted Math Score")
+
+  # Show both side-by-side
+  grid.arrange(p_rf, p_lmm, ncol = 2)
+}
+compare_lmm_rf("read", rf_model, model_lmer_full, train_data)
+compare_lmm_rf("escs", rf_model, model_lmer_full, train_data)
+compare_lmm_rf("book", rf_model, model_lmer_full, train_data)
+
+
+```
+
+
+
