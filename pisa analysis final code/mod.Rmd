@@ -61,6 +61,7 @@ train_data$school_year <- as.factor(train_data$school_year)
 levels(ireland_data$father_educ) <- c("less than ISCED1", "ISCED 1","ISCED 2","ISCED 3A","ISCED 3B, C" )
 
 levels(ireland_data$mother_educ) <- c("less than ISCED1", "ISCED 1","ISCED 2","ISCED 3A","ISCED 3B, C" )
+
 # Check the summary of the data to see how much data is missing
 summary(ireland_data)
 ```
@@ -209,45 +210,34 @@ print(head(importance_df, 10))
 
 
 ```{r}
-# Load required packages
-library(randomForest)
+
 library(pdp)
-library(ggplot2)
+library(effects)
 library(gridExtra)
+library(ggplot2)
 
-# Define list of predictor variables (same used in your rf_model)
-predictors <- c("internet", "gender", "wealth", "book", "father_educ", "mother_educ",
-                "read", "desk", "television", "computer_n", "car", "escs", "room", "school_year")
+compare_lmm_rf <- function(var, rf_model, lmm_model, train_data) {
+  # Partial Dependence Plot from Random Forest
+  pd <- partial(rf_model, pred.var = var, train = train_data)
+  p_rf <- autoplot(pd, rug = TRUE, train = train_data) +
+    labs(title = paste("Random Forest PDP -", var),
+         x = var, y = "Predicted Math Score") +
+    theme_minimal(base_size = 12) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-# Generate PDPs and format each with autoplot
-pdp_list <- lapply(predictors, function(var) {
-  pd <- partial(rf_model, pred.var = var, train = train_data)  # train_data must match your model
-  autoplot(pd, rug = TRUE, train = train_data) +
-    labs(title = paste("PDP -", var), x = var, y = "Predicted Math Score") +
-    theme_minimal(base_size = 10) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis for clarity
-})
+  # Effect Plot from Linear Mixed Model
+  ef <- Effect(var, lmm_model)
+  p_lmm <- plot(ef, main = paste("LMM Effect -", var), ylab = "Predicted Math Score")
 
-# Display all PDPs in a grid (3 columns)
-do.call(grid.arrange, c(pdp_list, ncol = 3))
- 
+  # Show both side-by-side
+  grid.arrange(p_rf, p_lmm, ncol = 2)
+}
+compare_lmm_rf("read", rf_model, model_lmer_full, train_data)
+compare_lmm_rf("escs", rf_model, model_lmer_full, train_data)
+compare_lmm_rf("book", rf_model, model_lmer_full, train_data)
 
-
-
-```
-
-
-
-```{r}
-# List of key variables to compare
-variables_to_plot <- c("escs", "read", "book", "wealth", "gender")
-
-# Generate PDP plots for each
-p_list <- lapply(variables_to_plot, function(var) {
-  plot_pdp_comparison(var, rf_model, model_lmer_full, train_data)
-})
-
-# Display them side-by-side or in grid
-p_list[[1]] + p_list[[2]] + p_list[[3]] + p_list[[4]] + p_list[[5]]
 
 ```
+
+
+
